@@ -45,27 +45,47 @@
         </div>
     </div>
 </form>
+
 <div class="row">
     <div class="col-2">
-        <h4>Base Questions</h4>
-        <ul class="list-group">
-            @if (Model.KnowledgeBase != null)
-            {
-                @foreach (var item in Model.KnowledgeBase.QnaDocuments)
+        <div class="card">
+            <div class="card-header">
+                Base Questions
+            </div>
+            <div class="card-body">
+                @if (Model.KnowledgeBase != null && Model.KnowledgeBase.QnaDocuments != null)
                 {
-                    <li class="list-group-item d-flex justify-content-between align-items-center" onclick="GetVisual(@item.Id)">
-                        @item.Questions[0]
-                        @if (@item.Context.Prompts.Count > 0)
+                    <ul class="list-group">
+
+                        @foreach (var item in Model.KnowledgeBase.QnaDocuments)
                         {
-                            <span class="badge badge-primary badge-pill">@item.Context.Prompts.Count</span>
+                            <li class="list-group-item d-flex justify-content-between align-items-center" onclick="GetVisual(@item.Id)">
+                                @item.Questions[0]
+                                @if (@item.Context.Prompts.Count > 0)
+                                {
+                                    <span class="badge badge-primary badge-pill">@item.Context.Prompts.Count</span>
+                                }
+                            </li>
                         }
-                    </li>
+
+                    </ul>
                 }
-            }
-        </ul>
+                else
+                {
+                    <span>No Questions Found</span>
+                }
+            </div>
+        </div>
     </div>
     <div class="col-10">
-        <div class="chart" id="qnaTree"></div>
+        <div class="card">
+            <div class="card-header">
+                Base Questions
+            </div>
+            <div class="card-body">
+                <div class="chart" id="qnaTree">Please select a question</div>
+            </div>
+        </div>
     </div>
 </div>
 <!-- Modal -->

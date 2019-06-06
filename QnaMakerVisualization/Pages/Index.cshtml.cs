@@ -26,8 +26,8 @@ namespace QnaMakerVisualization.Pages
         {
             _clientFactory = clientFactory;
             Environments = new List<SelectListItem>();
+            Environments.Add(new SelectListItem("Test", "test"));
             Environments.Add(new SelectListItem("Production", "prod"));
-            Environments.Add(new SelectListItem("Testing", "test"));
         }
         public async Task OnGet()
         {
@@ -80,6 +80,7 @@ namespace QnaMakerVisualization.Pages
             {
                 KnowledgeBase = new Models.KnowledgeBase();
             }
+            await OnGetKnowledgeBaseMetaData(endpoint, subscriptionKey);
         }
         public async Task<IActionResult> OnGetKnowledgeBaseMetaData(string endpoint, string subscriptionKey)
         {
@@ -159,6 +160,7 @@ namespace QnaMakerVisualization.Pages
             if (string.IsNullOrEmpty(HttpContext.Session.GetString("KnowledgeBase")))
             {
 
+                KnowledgeBases = HttpContext.Session.Get<Models.KnowledgeBaseMetaDataList>("KnowledgeBaseMetaDataList");
                 KnowledgeBaseDetails = HttpContext.Session.Get<Models.KnowledgeBaseDetails>("KnowledgeBaseDetails");
                 await GetKnowledgeBase(KnowledgeBaseDetails.Endpoint, KnowledgeBaseDetails.Environment, KnowledgeBaseDetails.KnowledgeBaseId, KnowledgeBaseDetails.SubscriptionKey);
                 GetQna(KnowledgeBase.QnaDocuments);
@@ -167,9 +169,9 @@ namespace QnaMakerVisualization.Pages
             }
             else
             {
+                KnowledgeBases = HttpContext.Session.Get<Models.KnowledgeBaseMetaDataList>("KnowledgeBaseMetaDataList");
                 KnowledgeBase = HttpContext.Session.Get<Models.KnowledgeBase>("KnowledgeBase");
                 QnaList = HttpContext.Session.Get<List<Models.Qna>>("QnaList");
-                KnowledgeBases = HttpContext.Session.Get<Models.KnowledgeBaseMetaDataList>("KnowledgeBaseMetaDataList");
             }
         }
     }
