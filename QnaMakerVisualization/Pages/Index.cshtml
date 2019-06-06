@@ -1,0 +1,158 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+@section Headers{
+    <link rel="stylesheet" href="~/css/Treant.css" />
+}
+<form method="post" asp-page-handler="SetKbDetails">
+    <div class="card">
+        <div class="card-header">
+            Qna Maker Settings
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        @Html.LabelFor(m => Model.KnowledgeBaseDetails.Endpoint)
+                        @Html.TextBoxFor(m => Model.KnowledgeBaseDetails.Endpoint, new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        @Html.LabelFor(m => Model.KnowledgeBaseDetails.SubscriptionKey)
+                        @Html.TextBoxFor(m => Model.KnowledgeBaseDetails.SubscriptionKey, new { @class = "form-control", @onchange = "GetKnowledgeBaseIds()" })
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        @Html.LabelFor(m => Model.KnowledgeBaseDetails.Environment)
+                        @Html.DropDownListFor(m => Model.KnowledgeBaseDetails.Environment, Model.Environments, new { @class = "form-control" })
+                    </div>
+                </div><div class="col">
+                    <div class="form-group">
+                        @Html.LabelFor(m => Model.KnowledgeBaseDetails.KnowledgeBaseId)
+                        @Html.DropDownListFor(m => Model.KnowledgeBaseDetails.KnowledgeBaseId, Model.KnowledgeBases.KnowledgeBases.Select(a => new SelectListItem() { Text = a.Name, Value = a.Id.ToString() }).ToList(), new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="col">
+                    <label>&nbsp;</label>
+                    <input type="submit" value="Get KB Data" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="row">
+    <div class="col-2">
+        <h4>Base Questions</h4>
+        <ul class="list-group">
+            @if (Model.KnowledgeBase != null)
+            {
+                @foreach (var item in Model.KnowledgeBase.QnaDocuments)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center" onclick="GetVisual(@item.Id)">
+                        @item.Questions[0]
+                        @if (@item.Context.Prompts.Count > 0)
+                        {
+                            <span class="badge badge-primary badge-pill">@item.Context.Prompts.Count</span>
+                        }
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+    <div class="col-10">
+        <div class="chart" id="qnaTree"></div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="qnaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Edit Document</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="qnaDetails">
+                    <div class="col">
+                        <div class="form-group">
+                            <label for="qnaDetailsQuestions">Questions</label>
+                            <input type="text" class="form-control" id="qnaDetailsQuestions" aria-describedby="qnaDetailsQuestionsHelp" />
+                            <small id="emailHelp" class="form-text text-muted">Keep questions semicolon (;) seperated</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="qnaDetailsAnswer">Answer</label>
+                            <textarea class="form-control" id="qnaDetailsAnswer" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="~/js/raphael.js"></script>
+<script src="~/js/Treant.js"></script>
+<script>
+    $(document).on("click", '.node', function (event) {
+        var element = event.target;
+        var qnaId = $(element).find(".node-qnaId").text();
+        if (qnaId === "") {
+            qnaId = $(element).parent().find(".node-qnaId").text();
+        }
+        $.get("?handler=question&qnaId=" + qnaId, function (data) {
+            $("#qnaDetailsQuestions").val(data[0].questions.join(';'));
+            $("#qnaDetailsAnswer").val(data[0].answer);
+            $('#qnaModal').modal('show');
+        });
+    });
+    function GetKnowledgeBaseIds() {
+        var EndPoint = $('#KnowledgeBaseDetails_Endpoint').val();
+        var SubscriptionKey = $('#KnowledgeBaseDetails_SubscriptionKey').val();
+        $.get("?handler=KnowledgeBaseMetaData&endpoint=" + EndPoint + "&subscriptionKey=" + SubscriptionKey,
+            function (data) {
+                $('#KnowledgeBaseDetails_KnowledgeBaseId')
+                    .find('option')
+                    .remove()
+                    .end();
+                $.each(data, function (index, value) {
+                    console.log(value.id);
+                    $('#KnowledgeBaseDetails_KnowledgeBaseId')
+                        .append('<option value="' + value.id + '">' + value.name + '</option>');
+                });
+            });
+    }
+    function GetVisual(qnaId) {
+        $.get("?handler=data&qnaId=" + qnaId, function (data) {
+            var children = data;
+
+            var chart_config = {
+                chart: {
+                    container: "#qnaTree",
+                    hideRootNode: true,
+                    connectors: {
+                        type: 'step'
+                    }
+                },
+                nodeStructure: {
+                    children: children
+                }
+            };
+            new Treant(chart_config);
+        });
+    }
+</script>
