@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28922.388
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QnaMakerVisualization", "QnaMakerVisualization\QnaMakerVisualization.csproj", "{03D8109C-9C5F-4A00-A4D9-B70E403CD4E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QnaMakerVisualization", "QnaMakerVisualization\QnaMakerVisualization.csproj", "{03D8109C-9C5F-4A00-A4D9-B70E403CD4E0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
